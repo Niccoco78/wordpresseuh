@@ -1,0 +1,14 @@
+---
+# tasks file for ansible-role-wordpress
+
+- name: Inclusion des tâches d'installation des paquets
+  ansible.builtin.include_tasks: install.yml
+
+- name: Inclusion des tâches MariaDB
+  ansible.builtin.include_tasks: mariadb.yml
+
+- name: Inclusion des tâches WordPress
+  ansible.builtin.include_tasks: wordpress.yml
+
+- name: Inclusion des tâches Apache
+  ansible.builtin.include_tasks: apache.yml

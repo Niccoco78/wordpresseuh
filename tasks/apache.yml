@@ -1,0 +1,70 @@
+---
+# tasks/apache.yml — Configuration d'Apache pour WordPress
+
+- name: Supprimer la page par défaut d'Apache
+  ansible.builtin.file:
+    path: "{{ wp_web_root }}/index.html"
+    state: absent
+
+# --- Configuration Apache pour Ubuntu/Debian ---
+
+- name: Déployer le VirtualHost WordPress (Debian/Ubuntu)
+  ansible.builtin.template:
+    src: wordpress.conf.j2
+    dest: /etc/apache2/sites-available/wordpress.conf
+    mode: '0644'
+  when: ansible_os_family == "Debian"
+  notify: restart apache
+
+- name: Activer le site WordPress (Debian/Ubuntu)
+  ansible.builtin.command: a2ensite wordpress.conf
+  changed_when: false
+  when: ansible_os_family == "Debian"
+  notify: restart apache
+
+- name: Activer le module rewrite (Debian/Ubuntu)
+  ansible.builtin.command: a2enmod rewrite
+  changed_when: false
+  when: ansible_os_family == "Debian"
+  notify: restart apache
+
+# --- Configuration Apache pour Rocky/RedHat ---
+
+- name: Configurer le DocumentRoot httpd (RedHat/Rocky)
+  ansible.builtin.lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: '^DocumentRoot'
+    line: 'DocumentRoot "{{ wp_web_root }}"'
+  when: ansible_os_family == "RedHat"
+  notify: restart apache
+
+- name: Configurer le Directory httpd (RedHat/Rocky)
+  ansible.builtin.blockinfile:
+    path: /etc/httpd/conf/httpd.conf
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - WordPress"
+    block: |
+      <Directory "{{ wp_web_root }}">
+          AllowOverride All
+          Require all granted
+      </Directory>
+  when: ansible_os_family == "RedHat"
+  notify: restart apache
+
+# --- Démarrage d'Apache ---
+
+- name: Démarrer Apache (Debian/Ubuntu)
+  ansible.builtin.shell: service apache2 start
+  changed_when: false
+  when: ansible_os_family == "Debian"
+
+- name: Démarrer php-fpm (RedHat/Rocky)
+  ansible.builtin.shell: |
+    pgrep php-fpm || /usr/sbin/php-fpm --daemonize
+  changed_when: false
+  when: ansible_os_family == "RedHat"
+
+- name: Démarrer httpd (RedHat/Rocky)
+  ansible.builtin.shell: |
+    pgrep httpd || /usr/sbin/httpd -DFOREGROUND &
+  changed_when: false
+  when: ansible_os_family == "RedHat"

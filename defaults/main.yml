@@ -1,0 +1,15 @@
+---
+# --- WordPress Database ---
+wp_db_name: wordpress
+wp_db_user: example
+wp_db_password: examplePW
+wp_db_root_password: examplerootPW
+
+# --- WordPress Site ---
+wp_site_url: "http://localhost"
+wp_web_root: /var/www/html
+
+# --- WordPress Download ---
+wp_download_url: "https://wordpress.org/latest.zip"
+wp_tmp_dir: /tmp
+

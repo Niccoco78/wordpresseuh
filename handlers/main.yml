@@ -1,0 +1,19 @@
+---
+# handlers file for ansible-role-wordpress
+
+- name: restart apache
+  ansible.builtin.shell: |
+    if [ "$(cat /etc/os-release | grep -i 'debian\|ubuntu')" ]; then
+      service apache2 restart
+    else
+      httpd -k restart
+    fi
+  listen: "restart apache"
+
+- name: restart mariadb
+  ansible.builtin.shell: |
+    pkill mysqld || true
+    sleep 2
+    mysqld_safe --datadir=/var/lib/mysql &
+    sleep 5
+  listen: "restart mariadb"

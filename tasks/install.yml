@@ -1,0 +1,18 @@
+---
+# tasks/install.yml — Installation des paquets nécessaires
+
+- name: Mettre à jour le cache APT (Debian/Ubuntu)
+  ansible.builtin.apt:
+    update_cache: yes
+  when: ansible_os_family == "Debian"
+
+- name: Mettre à jour le cache DNF (RedHat/Rocky)
+  ansible.builtin.dnf:
+    update_cache: yes
+  when: ansible_os_family == "RedHat"
+
+- name: Installer paquet
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ wordpress_packages }}"

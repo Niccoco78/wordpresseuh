@@ -1,0 +1,6 @@
+---
+- name: Test du rôle ansible-role-wordpress
+  hosts: localhost
+  become: yes
+  roles:
+    - ansible-role-wordpress

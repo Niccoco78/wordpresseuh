@@ -1,0 +1,51 @@
+---
+# tasks/wordpress.yml — Téléchargement et configuration de WordPress
+
+- name: Télécharger WordPress
+  ansible.builtin.get_url:
+    url: "{{ wp_download_url }}"
+    dest: "{{ wp_tmp_dir }}/latest.zip"
+    mode: '0644'
+
+- name: Installer le paquet unzip (si absent)
+  ansible.builtin.package:
+    name: unzip
+    state: present
+
+- name: Décompresser WordPress
+  ansible.builtin.unarchive:
+    src: "{{ wp_tmp_dir }}/latest.zip"
+    dest: "{{ wp_tmp_dir }}"
+    remote_src: yes
+    creates: "{{ wp_tmp_dir }}/wordpress/wp-config-sample.php"
+
+- name: Copier les fichiers WordPress vers le web root
+  ansible.builtin.copy:
+    src: "{{ wp_tmp_dir }}/wordpress/"
+    dest: "{{ wp_web_root }}/"
+    remote_src: yes
+    owner: "{{ wordpress_apache_user }}"
+    group: "{{ wordpress_apache_group }}"
+    mode: '0755'
+
+- name: Déployer le fichier wp-config.php depuis le template
+  ansible.builtin.template:
+    src: wp-config.php.j2
+    dest: "{{ wp_web_root }}/wp-config.php"
+    owner: "{{ wordpress_apache_user }}"
+    group: "{{ wordpress_apache_group }}"
+    mode: '0640'
+
+- name: Appliquer les permissions sur les répertoires WordPress
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: "{{ wordpress_apache_user }}"
+    group: "{{ wordpress_apache_group }}"
+    mode: '0755'
+    state: directory
+    recurse: yes
+  loop:
+    - "{{ wp_web_root }}"
+    - "{{ wp_web_root }}/wp-content"
+    - "{{ wp_web_root }}/wp-includes"
+    - "{{ wp_web_root }}/wp-admin"

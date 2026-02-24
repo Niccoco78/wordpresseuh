@@ -1,0 +1,37 @@
+---
+# vars file for ansible-role-wordpress
+
+_wordpress_packages:
+  Debian:
+    - apache2
+    - php
+    - libapache2-mod-php
+    - php-mysql
+    - mariadb-server
+    - wget
+    - unzip
+  RedHat:
+    - httpd
+    - php
+    - php-fpm
+    - php-mysqlnd
+    - mariadb-server
+    - wget
+    - unzip
+
+_wordpress_apache_service:
+  Debian: apache2
+  RedHat: httpd
+
+_wordpress_apache_user:
+  Debian: www-data
+  RedHat: apache
+
+_wordpress_apache_group:
+  Debian: www-data
+  RedHat: apache
+
+wordpress_packages: "{{ _wordpress_packages[ansible_os_family] }}"
+wordpress_apache_service: "{{ _wordpress_apache_service[ansible_os_family] }}"
+wordpress_apache_user: "{{ _wordpress_apache_user[ansible_os_family] }}"
+wordpress_apache_group: "{{ _wordpress_apache_group[ansible_os_family] }}"
